@@ -1,5 +1,4 @@
 #import <UIKit/UIKit.h>
-#import "SuperPlayer.h"
 #import "SuperPlayerModel.h"
 #import "SuperPlayerViewConfig.h"
 #import "SPVideoFrameDescription.h"
@@ -125,6 +124,6 @@ typedef NS_ENUM(NSInteger, SuperPlayerLayoutStyle) {
 @end
 
 
-@interface SuperPlayerViewNotTransform : SuperPlayerView
-
-@end
+//@interface SuperPlayerViewNotTransform : SuperPlayerView
+//
+//@end
