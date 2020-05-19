@@ -509,25 +509,25 @@ static UISlider * _volumeSlider;
     _isFullScreen = fullScreen;
     [self.fatherView.mm_viewController setNeedsStatusBarAppearanceUpdate];
 
-//    UIDeviceOrientation targetOrientation = [self _orientationForFullScreen:fullScreen];// [UIDevice currentDevice].orientation;
+    UIDeviceOrientation targetOrientation = [self _orientationForFullScreen:fullScreen];// [UIDevice currentDevice].orientation;
 
     if (fullScreen) {
         [self removeFromSuperview];
         [[UIApplication sharedApplication].keyWindow addSubview:_fullScreenBlackView];
         [_fullScreenBlackView mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.width.equalTo(@(ScreenWidth));
-            make.height.equalTo(@(ScreenHeight));
+            make.width.equalTo(@(ScreenHeight));
+            make.height.equalTo(@(ScreenWidth));
             make.center.equalTo([UIApplication sharedApplication].keyWindow);
         }];
 
         [[UIApplication sharedApplication].keyWindow addSubview:self];
         [self mas_remakeConstraints:^(MASConstraintMaker *make) {
             if (IsIPhoneX) {
-                make.width.equalTo(@(ScreenWidth - self.mm_safeAreaLeftGap * 2));
+                make.width.equalTo(@(ScreenHeight - self.mm_safeAreaTopGap * 2));
             } else {
-                make.width.equalTo(@(ScreenWidth));
+                make.width.equalTo(@(ScreenHeight));
             }
-            make.height.equalTo(@(ScreenHeight));
+            make.height.equalTo(@(ScreenWidth));
             make.center.equalTo([UIApplication sharedApplication].keyWindow);
         }];
         [self.superview setNeedsLayout];
@@ -551,19 +551,19 @@ static UISlider * _volumeSlider;
             [self removeFromSuperview];
             [[UIApplication sharedApplication].keyWindow addSubview:_fullScreenBlackView];
             [_fullScreenBlackView mas_remakeConstraints:^(MASConstraintMaker *make) {
-                make.width.equalTo(@(ScreenWidth));
-                make.height.equalTo(@(ScreenHeight));
+                make.width.equalTo(@(ScreenHeight));
+                make.height.equalTo(@(ScreenWidth));
                 make.center.equalTo([UIApplication sharedApplication].keyWindow);
             }];
 
             [[UIApplication sharedApplication].keyWindow addSubview:self];
             [self mas_remakeConstraints:^(MASConstraintMaker *make) {
                 if (IsIPhoneX) {
-                    make.width.equalTo(@(ScreenWidth - self.mm_safeAreaLeftGap * 2));
+                    make.width.equalTo(@(ScreenHeight - self.mm_safeAreaTopGap * 2));
                 } else {
-                    make.width.equalTo(@(ScreenWidth));
+                    make.width.equalTo(@(ScreenHeight));
                 }
-                make.height.equalTo(@(ScreenHeight));
+                make.height.equalTo(@(ScreenWidth));
                 make.center.equalTo([UIApplication sharedApplication].keyWindow);
             }];
         }
@@ -696,17 +696,13 @@ static UISlider * _volumeSlider;
 
 /** 全屏 */
 - (void)setFullScreen:(BOOL)fullScreen {
-    UIInterfaceOrientation orientation = fullScreen ? UIInterfaceOrientationLandscapeRight : UIInterfaceOrientationPortrait;
-    NSNumber *value = @(orientation);
-    [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
 
-//    if (_isFullScreen != fullScreen) {
-//        [self _adjustTransform:[self _orientationForFullScreen:fullScreen]];
-//        [self _switchToFullScreen:fullScreen];
-//        [self _switchToLayoutStyle:fullScreen ? SuperPlayerLayoutStyleFullScreen : SuperPlayerLayoutStyleCompact];
-//    }
-//    _isFullScreen = fullScreen;
-    
+    if (_isFullScreen != fullScreen) {
+        [self _adjustTransform:[self _orientationForFullScreen:fullScreen]];
+        [self _switchToFullScreen:fullScreen];
+        [self _switchToLayoutStyle:fullScreen ? SuperPlayerLayoutStyleFullScreen : SuperPlayerLayoutStyleCompact];
+    }
+    _isFullScreen = fullScreen;
     /*
     self.controlView.compact = !_isFullScreen;
     if (fullScreen) {
@@ -823,8 +819,7 @@ static UISlider * _volumeSlider;
 
     BOOL shouldFullScreen = UIDeviceOrientationIsLandscape(orientation);
     [self _switchToFullScreen:shouldFullScreen];
-    // 不用transform
-//    [self _adjustTransform:[self _orientationForFullScreen:shouldFullScreen]];
+    [self _adjustTransform:[self _orientationForFullScreen:shouldFullScreen]];
     [self _switchToLayoutStyle:style];
 }
 
