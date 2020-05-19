@@ -38,6 +38,17 @@ typedef NS_ENUM(NSInteger, ButtonAction) {
 @interface SuperPlayerView () <UIGestureRecognizerDelegate,UIAlertViewDelegate,
  SuperPlayerControlViewDelegate,  AVAssetResourceLoaderDelegate>
 
+// SuperPlayerView_Protected.h
+//@interface SuperPlayerView ()
+{
+    @protected
+    UIView *_fullScreenBlackView;
+    SuperPlayerControlView *_controlView;
+    NSURLSessionTask *_currentLoadingTask;
+    
+    BOOL _isFullScreen;
+    SuperPlayerLayoutStyle _layoutStyle;
+}
 
 /** 用来保存快进的总时长 */
 @property (nonatomic, assign) CGFloat                sumTime;

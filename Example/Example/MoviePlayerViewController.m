@@ -404,7 +404,8 @@ __weak UITextField *urlField;
 
 - (SuperPlayerView *)playerView {
     if (!_playerView) {
-        _playerView = [[SuperPlayerView alloc] init];
+//        _playerView = [[SuperPlayerView alloc] init];
+        _playerView = [[SuperPlayerViewNotTransform alloc] init];
         _playerView.fatherView = _playerFatherView;
         // 设置代理
         _playerView.delegate = self;

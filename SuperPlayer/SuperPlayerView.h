@@ -123,3 +123,8 @@ typedef NS_ENUM(NSInteger, SuperPlayerLayoutStyle) {
 - (void)seekToTime:(NSInteger)dragedSeconds;
 
 @end
+
+
+@interface SuperPlayerViewNotTransform : SuperPlayerView
+
+@end

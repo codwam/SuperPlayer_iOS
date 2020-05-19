@@ -23,11 +23,7 @@ static UISlider * _volumeSlider;
 #pragma clang diagnostic ignored"-Wdeprecated-declarations"
 
 
-@interface SuperPlayerView() <TXVodPlayListener, TXLivePlayListener, TXLiveBaseDelegate> {
-    UIView *_fullScreenBlackView;
-    SuperPlayerControlView *_controlView;
-    NSURLSessionTask *_currentLoadingTask;
-}
+@interface SuperPlayerView() <TXVodPlayListener, TXLivePlayListener, TXLiveBaseDelegate>
 @end
 
 @implementation SuperPlayerView
