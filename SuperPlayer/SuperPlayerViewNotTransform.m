@@ -13,10 +13,39 @@
 
 @implementation SuperPlayerViewNotTransform
 
-- (void)_switchToFullScreen:(BOOL)fullScreen {
-    if (_isFullScreen == fullScreen) {
+/** 全屏 */
+- (void)setFullScreen:(BOOL)fullScreen {
+    _isFullScreen = fullScreen;
+    UIInterfaceOrientation orientation = fullScreen ? UIInterfaceOrientationLandscapeRight : UIInterfaceOrientationPortrait;
+    NSNumber *value = @(orientation);
+    [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
+}
+
+/**
+ *  屏幕方向发生变化会调用这里
+ */
+- (void)onDeviceOrientationChange {
+//    if (!self.isLoaded) { return; }
+    if (self.isLockScreen) { return; }
+    if (self.didEnterBackground) { return; };
+    if (SuperPlayerWindowShared.isShowing) { return; }
+    UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
+    if (orientation == UIDeviceOrientationFaceUp) {
         return;
     }
+    SuperPlayerLayoutStyle style = [self defaultStyleForDeviceOrientation:[UIDevice currentDevice].orientation];
+
+    BOOL shouldFullScreen = UIDeviceOrientationIsLandscape(orientation);
+    [self _switchToFullScreen:shouldFullScreen];
+    // 不需要旋转
+//    [self _adjustTransform:[self _orientationForFullScreen:shouldFullScreen]];
+    [self _switchToLayoutStyle:style];
+}
+
+- (void)_switchToFullScreen:(BOOL)fullScreen {
+//    if (_isFullScreen == fullScreen) {
+//        return;
+//    }
     _isFullScreen = fullScreen;
     [self.fatherView.mm_viewController setNeedsStatusBarAppearanceUpdate];
 
@@ -104,6 +133,14 @@
     [self.fatherView.mm_viewController setNeedsStatusBarAppearanceUpdate];
     _layoutStyle = style;
      */
+}
+
+- (SuperPlayerLayoutStyle)defaultStyleForDeviceOrientation:(UIDeviceOrientation)orientation {
+    if (UIDeviceOrientationIsPortrait(orientation)) {
+        return SuperPlayerLayoutStyleCompact;
+    } else {
+        return SuperPlayerLayoutStyleFullScreen;
+    }
 }
 
 - (void)_adjustTransform:(UIDeviceOrientation)orientation {
