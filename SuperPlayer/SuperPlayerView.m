@@ -159,15 +159,15 @@ static UISlider * _volumeSlider;
 - (void)_playWithModel:(SuperPlayerModel *)playerModel {
     [_currentLoadingTask cancel];
     _currentLoadingTask = nil;
-
+    
     _playerModel = playerModel;
-
+    
     [self pause];
     
     NSString *videoURL = playerModel.playingDefinitionUrl;
     if (videoURL != nil) {
         [self configTXPlayer];
-    } else if (playerModel.videoId || playerModel.videoIdV2) {
+    } else if (playerModel.videoId) {
         self.isLive = NO;
         __weak __typeof(self) weakSelf = self;
         _currentLoadingTask = [_playerModel requestWithCompletion:
@@ -775,7 +775,7 @@ static UISlider * _volumeSlider;
 
 // 状态条变化通知（在前台播放才去处理）
 - (void)onStatusBarOrientationChange {
-    [self onDeviceOrientationChange];
+//    [self onDeviceOrientationChange];
     return;
     if (!self.didEnterBackground) {
         UIInterfaceOrientation orientation = (UIInterfaceOrientation)[UIDevice currentDevice].orientation;
@@ -1639,17 +1639,13 @@ static UISlider * _volumeSlider;
 - (int)livePlayerType {
     int playType = -1;
     NSString *videoURL = self.playerModel.playingDefinitionUrl;
-    NSURLComponents *components = [NSURLComponents componentsWithString:videoURL];
-    NSString *scheme = [[components scheme] lowercaseString];
-    if ([scheme isEqualToString:@"rtmp"]) {
+    if ([videoURL hasPrefix:@"rtmp:"]) {
         playType = PLAY_TYPE_LIVE_RTMP;
-    } else if ([scheme hasPrefix:@"http"]
-               && [[components path].lowercaseString hasSuffix:@".flv"]) {
+    } else if (([videoURL hasPrefix:@"https:"] || [videoURL hasPrefix:@"http:"]) && ([videoURL rangeOfString:@".flv"].length > 0)) {
         playType = PLAY_TYPE_LIVE_FLV;
     }
     return playType;
 }
-
 
 - (void)reportPlay {
     if (self.reportTime == nil)

@@ -83,17 +83,14 @@ const NSString *kPlayCGIHostname = @"playvideo.qcloud.com";
     AFHTTPSessionManager *manager = self.sessionManager;
     int ver = self.videoId ? 4 : 2;
     NSString *url = [NSString stringWithFormat:@"https://%@/getplayinfo/v%d/%ld/%@",
-                     kPlayCGIHostname, ver, self.appId, self.videoId ? self.videoId.fileId : self.videoIdV2.fileId];
+                     kPlayCGIHostname, ver, self.appId, self.videoId.fileId];
 
     // 防盗链参数
     NSDictionary *params = [self _buildParams];
-    
+
     __weak SuperPlayerModel *weakSelf = self;
-    return [manager GET:url
-             parameters:params
-                headers:nil
-               progress:nil
-                success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+    return [manager GET:url parameters:params headers:nil progress:nil
+         success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         __strong SuperPlayerModel *self = weakSelf;
 #if DEBUG
         NSLog(@"%@", responseObject);
@@ -166,7 +163,4 @@ const NSString *kPlayCGIHostname = @"playvideo.qcloud.com";
     return params;
 }
 
-@end
-
-@implementation SuperPlayerVideoIdV2
 @end

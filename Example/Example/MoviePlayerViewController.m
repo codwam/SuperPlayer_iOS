@@ -21,6 +21,7 @@
 #import "AFNetworking.h"
 #import "UIImageView+WebCache.h"
 #import "TXLiteAVSDK.h"
+#import "SuperPlayerViewNotTransform.h"
 
 #define LIST_VIDEO_CELL_ID @"LIST_VIDEO_CELL_ID"
 #define LIST_LIVE_CELL_ID @"LIST_LIVE_CELL_ID"

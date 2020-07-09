@@ -11,14 +11,62 @@
 
 #import "SuperPlayerView+Private.h"
 
+@interface SuperPlayerViewNotTransform () {
+    BOOL _didAddObserver;
+}
+
+@end
+
 @implementation SuperPlayerViewNotTransform
+
+#pragma mark - 旋转屏幕
++ (void)changeOrientation:(UIInterfaceOrientation)toOrientation{
+  
+//  [self uploadLog:@"旋转屏幕"];
+
+  if ([[UIDevice currentDevice] respondsToSelector:@selector(setOrientation:)]) {
+        SEL selector = NSSelectorFromString(@"setOrientation:");
+        NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[UIDevice instanceMethodSignatureForSelector:selector]];
+        [invocation setSelector:selector];
+        [invocation setTarget:[UIDevice currentDevice]];
+        int val = toOrientation;
+        [invocation setArgument:&val atIndex:2];
+        [invocation invoke];
+    }
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+    if (context == @"UIScreen") {
+        NSLog(@"%@", change);
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
+}
+
+- (void)dealloc
+{
+//    [UIScreen.mainScreen removeObserver:self forKeyPath:@"bounds"];
+}
 
 /** 全屏 */
 - (void)setFullScreen:(BOOL)fullScreen {
+//    if (!_didAddObserver) {
+//        [UIScreen.mainScreen addObserver:self forKeyPath:@"_interfaceOrientation" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:@"UIScreen"];
+//        _didAddObserver = YES;
+//    }
+    
     _isFullScreen = fullScreen;
     UIInterfaceOrientation orientation = fullScreen ? UIInterfaceOrientationLandscapeRight : UIInterfaceOrientationPortrait;
-    NSNumber *value = @(orientation);
-    [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
+//    [UIScreen.mainScreen setValue:@(orientation) forKey:@"_interfaceOrientation"];
+    
+    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+//    NSNumber *value = @(orientation);
+//    [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
+    
+    [[self class] changeOrientation:orientation];
+    
+    [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
 }
 
 /**
@@ -26,20 +74,34 @@
  */
 - (void)onDeviceOrientationChange {
 //    if (!self.isLoaded) { return; }
-    if (self.isLockScreen) { return; }
+//    if (self.isLockScreen) { return; }
     if (self.didEnterBackground) { return; };
     if (SuperPlayerWindowShared.isShowing) { return; }
     UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
     if (orientation == UIDeviceOrientationFaceUp) {
         return;
     }
-//    SuperPlayerLayoutStyle style = [self defaultStyleForDeviceOrientation:[UIDevice currentDevice].orientation];
+    
+    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+    NSLog(@"mainScreen: %@", [UIScreen mainScreen]);
 
+    NSLog(@"%@", [UIScreen.mainScreen performSelector:@selector(_ivarDescription)]);
+    NSLog(@"%@", [UIDevice.currentDevice performSelector:@selector(_ivarDescription)]);
+    
+    [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
+    
+    NSMutableString *string = [NSMutableString string];
+    [string appendFormat:@"mainScreen: %@\n", [UIScreen mainScreen]];
+    [string appendFormat:@"orientation: %d\n", [UIDevice currentDevice].orientation];
+    NSLog(@"%s - %@", __func__, string);
+    
+    SuperPlayerLayoutStyle style = [self defaultStyleForDeviceOrientation:[UIDevice currentDevice].orientation];
+    
     BOOL shouldFullScreen = UIDeviceOrientationIsLandscape(orientation);
     [self _switchToFullScreen:shouldFullScreen];
     // 不需要旋转
 //    [self _adjustTransform:[self _orientationForFullScreen:shouldFullScreen]];
-//    [self _switchToLayoutStyle:style];
+    [self _switchToLayoutStyle:style];
 }
 
 - (void)_switchToFullScreen:(BOOL)fullScreen {
@@ -54,33 +116,42 @@
     if (fullScreen) {
         [self removeFromSuperview];
         [[UIApplication sharedApplication].keyWindow addSubview:_fullScreenBlackView];
-        CGFloat width = ScreenWidth;
-        CGFloat height = ScreenHeight;
-        UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
-        if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight) {
-            width = MAX(ScreenWidth, ScreenHeight);
-            height = MIN(ScreenWidth, ScreenHeight);
-        }
         [_fullScreenBlackView mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.width.equalTo(@(width));
-            make.height.equalTo(@(height));
+            make.width.equalTo(@(ScreenWidth));
+            make.height.equalTo(@(ScreenHeight));
             make.center.equalTo([UIApplication sharedApplication].keyWindow);
         }];
 
         [[UIApplication sharedApplication].keyWindow addSubview:self];
         [self mas_remakeConstraints:^(MASConstraintMaker *make) {
             if (IsIPhoneX) {
-                make.width.equalTo(@(width - self.mm_safeAreaLeftGap * 2));
+                make.width.equalTo(@(ScreenWidth - self.mm_safeAreaLeftGap * 2));
             } else {
-                make.width.equalTo(@(width));
+                make.width.equalTo(@(ScreenWidth));
             }
-            make.height.equalTo(@(height));
+            make.height.equalTo(@(ScreenHeight));
             make.center.equalTo([UIApplication sharedApplication].keyWindow);
         }];
         [self.superview setNeedsLayout];
+        
+        NSMutableString *string = [NSMutableString string];
+        [string appendFormat:@"fullScreen: %d\n", fullScreen];
+        [string appendFormat:@"_fullScreenBlackView: %@\n", _fullScreenBlackView];
+        [string appendFormat:@"self: %@\n", self];
+        [string appendFormat:@"mainScreen: %@\n", [UIScreen mainScreen]];
+        [string appendFormat:@"orientation: %d\n", [UIDevice currentDevice].orientation];
+        [string appendFormat:@"keyWindow: %@\n", [UIApplication sharedApplication].keyWindow];
+        NSLog(@"%s\n %@", __func__, string);
     } else {
         [_fullScreenBlackView removeFromSuperview];
         [self addPlayerToFatherView:self.fatherView];
+        
+        NSMutableString *string = [NSMutableString string];
+        [string appendFormat:@"self: %@\n", self];
+        [string appendFormat:@"mainScreen: %@\n", [UIScreen mainScreen]];
+        [string appendFormat:@"orientation: %d\n", [UIDevice currentDevice].orientation];
+        [string appendFormat:@"removeFromSuperview\n"];
+        NSLog(@"%s - %@", __func__, string);
     }
 }
 
@@ -97,37 +168,45 @@
         if (_layoutStyle != SuperPlayerLayoutStyleFullScreen)  { //UIInterfaceOrientationIsPortrait(currentOrientation)) {
             [self removeFromSuperview];
             [[UIApplication sharedApplication].keyWindow addSubview:_fullScreenBlackView];
-            CGFloat width = ScreenWidth;
-            CGFloat height = ScreenHeight;
-            UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
-            if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight) {
-                width = MAX(ScreenWidth, ScreenHeight);
-                height = MIN(ScreenWidth, ScreenHeight);
-            }
             [_fullScreenBlackView mas_remakeConstraints:^(MASConstraintMaker *make) {
-                make.width.equalTo(@(width));
-                make.height.equalTo(@(height));
+                make.width.equalTo(@(ScreenWidth));
+                make.height.equalTo(@(ScreenHeight));
                 make.center.equalTo([UIApplication sharedApplication].keyWindow);
             }];
 
             [[UIApplication sharedApplication].keyWindow addSubview:self];
             [self mas_remakeConstraints:^(MASConstraintMaker *make) {
                 if (IsIPhoneX) {
-                    make.width.equalTo(@(width - self.mm_safeAreaLeftGap * 2));
+                    make.width.equalTo(@(ScreenWidth - self.mm_safeAreaLeftGap * 2));
                 } else {
-                    make.width.equalTo(@(width));
+                    make.width.equalTo(@(ScreenWidth));
                 }
-                make.height.equalTo(@(height));
+                make.height.equalTo(@(ScreenHeight));
                 make.center.equalTo([UIApplication sharedApplication].keyWindow);
             }];
+            
+            NSMutableString *string = [NSMutableString string];
+            [string appendFormat:@"style: %d\n", style];
+            [string appendFormat:@"_layoutStyle: %d\n", _layoutStyle];
+            [string appendFormat:@"_fullScreenBlackView: %@\n", _fullScreenBlackView];
+            [string appendFormat:@"self: %@\n", self];
+            [string appendFormat:@"mainScreen: %@\n", [UIScreen mainScreen]];
+            [string appendFormat:@"orientation: %d\n", [UIDevice currentDevice].orientation];
+            NSLog(@"%s\n %@", __func__, string);
         }
     } else {
         [_fullScreenBlackView removeFromSuperview];
+        
+        NSMutableString *string = [NSMutableString string];
+        [string appendFormat:@"self: %@\n", self];
+        [string appendFormat:@"mainScreen: %@\n", [UIScreen mainScreen]];
+        [string appendFormat:@"orientation: %d\n", [UIDevice currentDevice].orientation];
+        [string appendFormat:@"removeFromSuperview\n"];
+        NSLog(@"%s - %@", __func__, string);
     }
     self.controlView.compact = style == SuperPlayerLayoutStyleCompact;
 
-    [[UIApplication sharedApplication].keyWindow  layoutIfNeeded];
-
+    [[UIApplication sharedApplication].keyWindow layoutIfNeeded];
 
     // iOS6.0之后,设置状态条的方法能使用的前提是shouldAutorotate为NO,也就是说这个视图控制器内,旋转要关掉;
     // 也就是说在实现这个方法的时候-(BOOL)shouldAutorotate返回值要为NO
