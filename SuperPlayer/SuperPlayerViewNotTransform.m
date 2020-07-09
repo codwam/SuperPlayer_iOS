@@ -33,13 +33,13 @@
     if (orientation == UIDeviceOrientationFaceUp) {
         return;
     }
-    SuperPlayerLayoutStyle style = [self defaultStyleForDeviceOrientation:[UIDevice currentDevice].orientation];
+//    SuperPlayerLayoutStyle style = [self defaultStyleForDeviceOrientation:[UIDevice currentDevice].orientation];
 
     BOOL shouldFullScreen = UIDeviceOrientationIsLandscape(orientation);
     [self _switchToFullScreen:shouldFullScreen];
     // 不需要旋转
 //    [self _adjustTransform:[self _orientationForFullScreen:shouldFullScreen]];
-    [self _switchToLayoutStyle:style];
+//    [self _switchToLayoutStyle:style];
 }
 
 - (void)_switchToFullScreen:(BOOL)fullScreen {
@@ -54,20 +54,27 @@
     if (fullScreen) {
         [self removeFromSuperview];
         [[UIApplication sharedApplication].keyWindow addSubview:_fullScreenBlackView];
+        CGFloat width = ScreenWidth;
+        CGFloat height = ScreenHeight;
+        UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
+        if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight) {
+            width = MAX(ScreenWidth, ScreenHeight);
+            height = MIN(ScreenWidth, ScreenHeight);
+        }
         [_fullScreenBlackView mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.width.equalTo(@(ScreenWidth));
-            make.height.equalTo(@(ScreenHeight));
+            make.width.equalTo(@(width));
+            make.height.equalTo(@(height));
             make.center.equalTo([UIApplication sharedApplication].keyWindow);
         }];
 
         [[UIApplication sharedApplication].keyWindow addSubview:self];
         [self mas_remakeConstraints:^(MASConstraintMaker *make) {
             if (IsIPhoneX) {
-                make.width.equalTo(@(ScreenWidth - self.mm_safeAreaLeftGap * 2));
+                make.width.equalTo(@(width - self.mm_safeAreaLeftGap * 2));
             } else {
-                make.width.equalTo(@(ScreenWidth));
+                make.width.equalTo(@(width));
             }
-            make.height.equalTo(@(ScreenHeight));
+            make.height.equalTo(@(height));
             make.center.equalTo([UIApplication sharedApplication].keyWindow);
         }];
         [self.superview setNeedsLayout];
@@ -90,20 +97,27 @@
         if (_layoutStyle != SuperPlayerLayoutStyleFullScreen)  { //UIInterfaceOrientationIsPortrait(currentOrientation)) {
             [self removeFromSuperview];
             [[UIApplication sharedApplication].keyWindow addSubview:_fullScreenBlackView];
+            CGFloat width = ScreenWidth;
+            CGFloat height = ScreenHeight;
+            UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
+            if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight) {
+                width = MAX(ScreenWidth, ScreenHeight);
+                height = MIN(ScreenWidth, ScreenHeight);
+            }
             [_fullScreenBlackView mas_remakeConstraints:^(MASConstraintMaker *make) {
-                make.width.equalTo(@(ScreenWidth));
-                make.height.equalTo(@(ScreenHeight));
+                make.width.equalTo(@(width));
+                make.height.equalTo(@(height));
                 make.center.equalTo([UIApplication sharedApplication].keyWindow);
             }];
 
             [[UIApplication sharedApplication].keyWindow addSubview:self];
             [self mas_remakeConstraints:^(MASConstraintMaker *make) {
                 if (IsIPhoneX) {
-                    make.width.equalTo(@(ScreenWidth - self.mm_safeAreaLeftGap * 2));
+                    make.width.equalTo(@(width - self.mm_safeAreaLeftGap * 2));
                 } else {
-                    make.width.equalTo(@(ScreenWidth));
+                    make.width.equalTo(@(width));
                 }
-                make.height.equalTo(@(ScreenHeight));
+                make.height.equalTo(@(height));
                 make.center.equalTo([UIApplication sharedApplication].keyWindow);
             }];
         }

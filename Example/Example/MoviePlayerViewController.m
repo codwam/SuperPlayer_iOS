@@ -164,11 +164,17 @@ __weak UITextField *urlField;
             });
         };
     }
+    
+    AppDelegate *del = (AppDelegate *) [UIApplication sharedApplication].delegate;
+    del.allowRotate = true;
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     self.navigationController.navigationBar.hidden = YES;
+    
+    AppDelegate *del = (AppDelegate *) [UIApplication sharedApplication].delegate;
+    del.allowRotate = false;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
