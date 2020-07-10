@@ -29,7 +29,7 @@
         NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[UIDevice instanceMethodSignatureForSelector:selector]];
         [invocation setSelector:selector];
         [invocation setTarget:[UIDevice currentDevice]];
-        int val = toOrientation;
+        NSInteger val = toOrientation;
         [invocation setArgument:&val atIndex:2];
         [invocation invoke];
     }
@@ -38,7 +38,8 @@
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if (context == @"UIScreen") {
-        NSLog(@"%@", change);
+        NSLog(@"%@", [NSThread callStackSymbols]);
+        NSLog(@"%s:\n %@", __func__, change);
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
@@ -46,27 +47,36 @@
 
 - (void)dealloc
 {
-//    [UIScreen.mainScreen removeObserver:self forKeyPath:@"bounds"];
+    NSLog(@"%s", __func__);
+    NSLog(@"%@", [NSThread callStackSymbols]);
+    
+    [UIScreen.mainScreen removeObserver:self forKeyPath:@"interfaceOrientation"];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        NSLog(@"%s", __func__);
+        NSLog(@"%@", [NSThread callStackSymbols]);
+        
+        [UIScreen.mainScreen addObserver:self forKeyPath:@"interfaceOrientation" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:@"UIScreen"];
+        NSLog(@"UIScreen _didAddObserver");
+    }
+    return self;
 }
 
 /** 全屏 */
 - (void)setFullScreen:(BOOL)fullScreen {
-//    if (!_didAddObserver) {
-//        [UIScreen.mainScreen addObserver:self forKeyPath:@"_interfaceOrientation" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:@"UIScreen"];
-//        _didAddObserver = YES;
-//    }
-    
     _isFullScreen = fullScreen;
     UIInterfaceOrientation orientation = fullScreen ? UIInterfaceOrientationLandscapeRight : UIInterfaceOrientationPortrait;
 //    [UIScreen.mainScreen setValue:@(orientation) forKey:@"_interfaceOrientation"];
     
-    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+//    [[UIDevice currentDevice] setValue:@(UIInterfaceOrientationUnknown) forKey:@"orientation"];
 //    NSNumber *value = @(orientation);
 //    [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
     
     [[self class] changeOrientation:orientation];
-    
-    [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
 }
 
 /**
@@ -82,17 +92,17 @@
         return;
     }
     
-    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+//    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
     NSLog(@"mainScreen: %@", [UIScreen mainScreen]);
 
     NSLog(@"%@", [UIScreen.mainScreen performSelector:@selector(_ivarDescription)]);
     NSLog(@"%@", [UIDevice.currentDevice performSelector:@selector(_ivarDescription)]);
     
-    [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
+//    [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
     
     NSMutableString *string = [NSMutableString string];
     [string appendFormat:@"mainScreen: %@\n", [UIScreen mainScreen]];
-    [string appendFormat:@"orientation: %d\n", [UIDevice currentDevice].orientation];
+    [string appendFormat:@"orientation: %ld\n", (long)[UIDevice currentDevice].orientation];
     NSLog(@"%s - %@", __func__, string);
     
     SuperPlayerLayoutStyle style = [self defaultStyleForDeviceOrientation:[UIDevice currentDevice].orientation];
@@ -116,7 +126,9 @@
     if (fullScreen) {
         [self removeFromSuperview];
         [[UIApplication sharedApplication].keyWindow addSubview:_fullScreenBlackView];
-        [_fullScreenBlackView mas_makeConstraints:^(MASConstraintMaker *make) {
+        [_fullScreenBlackView mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(@(0));
+            make.top.equalTo(@(0));
             make.width.equalTo(@(ScreenWidth));
             make.height.equalTo(@(ScreenHeight));
             make.center.equalTo([UIApplication sharedApplication].keyWindow);
@@ -169,6 +181,8 @@
             [self removeFromSuperview];
             [[UIApplication sharedApplication].keyWindow addSubview:_fullScreenBlackView];
             [_fullScreenBlackView mas_remakeConstraints:^(MASConstraintMaker *make) {
+                make.left.equalTo(@(0));
+                make.top.equalTo(@(0));
                 make.width.equalTo(@(ScreenWidth));
                 make.height.equalTo(@(ScreenHeight));
                 make.center.equalTo([UIApplication sharedApplication].keyWindow);

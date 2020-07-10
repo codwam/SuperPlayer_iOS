@@ -114,10 +114,10 @@ static UISlider * _volumeSlider;
                                                  name:UIDeviceOrientationDidChangeNotification
                                                object:nil];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(onStatusBarOrientationChange)
-                                                 name:UIApplicationDidChangeStatusBarOrientationNotification
-                                               object:nil];
+//    [[NSNotificationCenter defaultCenter] addObserver:self
+//                                             selector:@selector(onStatusBarOrientationChange)
+//                                                 name:UIApplicationDidChangeStatusBarOrientationNotification
+//                                               object:nil];
 }
 
 #pragma mark - layoutSubviews

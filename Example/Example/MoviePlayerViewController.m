@@ -83,6 +83,7 @@ __weak UITextField *urlField;
 
 - (void)dealloc {
     NSLog(@"%@释放了",self.class);
+    NSLog(@"%s", __func__);
     [_manager invalidateSessionCancelingTasks:YES resetSession:YES];
 }
 
@@ -398,6 +399,10 @@ __weak UITextField *urlField;
 
 - (BOOL)prefersStatusBarHidden {
     return self.playerView.isFullScreen;
+}
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+    return UIInterfaceOrientationMaskAll;
 }
 
 #pragma mark - SuperPlayerDelegate

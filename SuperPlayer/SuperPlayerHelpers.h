@@ -17,7 +17,7 @@
 // 颜色值RGB
 #define RGBA(r,g,b,a)                       [UIColor colorWithRed:r/255.0f green:g/255.0f blue:b/255.0f alpha:a]
 // 图片路径
-#define SuperPlayerImage(file)              ([UIImage imageNamed:file inBundle:[NSBundle bundleForClass:[SuperPlayerView class]] compatibleWithTraitCollection:nil] ?: [UIImage imageNamed:file inBundle:[NSBundle bundleWithURL:[[NSBundle bundleForClass:[SuperPlayerView class]] URLForResource:@"HycanWidgets.bundle/SuperPlayer" withExtension:@"bundle"]] compatibleWithTraitCollection:nil] ?: [UIImage imageNamed:[@"SuperPlayer.bundle" stringByAppendingPathComponent:file]])
+#define SuperPlayerImage(file)              [UIImage imageNamed:[@"SuperPlayer.bundle" stringByAppendingPathComponent:file]]
 
 #define IsIPhoneX                           (ScreenHeight >= 812 || ScreenWidth >= 812)
 

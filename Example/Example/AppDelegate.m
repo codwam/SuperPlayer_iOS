@@ -11,6 +11,10 @@
 #import "MainViewController.h"
 #import <Bugly/Bugly.h>
 
+#ifdef DEBUG
+    @import CocoaDebug;
+#endif
+
 @interface AppDelegate ()
 
 @end
@@ -25,7 +29,35 @@
     }
 }
 
+-(void)removeCache
+{
+    //===============清除缓存==============
+    NSString *cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    NSArray *files = [[NSFileManager defaultManager] subpathsAtPath:cachePath];
+
+    // NSLog(@"文件数 ：%lu",(unsigned long)[files count]);
+    for (NSString *p in files)
+    {
+        NSError *error;
+        NSString *path = [cachePath stringByAppendingPathComponent:p];
+        if ([[NSFileManager defaultManager] fileExistsAtPath:path] && [[NSFileManager defaultManager] isDeletableFileAtPath:path])
+        {
+            if (![[NSFileManager defaultManager] removeItemAtPath:path error:&error]) {
+                NSLog(@"Error trying to delete %@: %@", path, error);
+            }
+        } else {
+            NSLog(@"Can't delete %@", path);
+        }
+    }
+}
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    #ifdef DEBUG
+        [CocoaDebug enable];
+    #endif
+    
+    [self removeCache];
+    
     // Override point for customization after application launch.
     //启动bugly组件，bugly组件为腾讯提供的用于crash上报和分析的开放组件，如果您不需要该组件，可以自行移除
     [Bugly startWithAppId:@"18aed7ec51"];
@@ -88,6 +120,11 @@
 }
 
 - (UIInterfaceOrientationMask)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window {
+    Class debug = NSClassFromString(@"CocoaDebug.CocoaDebugWindow");
+    if ([window isMemberOfClass:debug]) {
+        return UIInterfaceOrientationMaskAll;
+    }
+    
     if (self.allowRotate) {
         return UIInterfaceOrientationMaskAll;
     }
